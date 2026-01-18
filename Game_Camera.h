@@ -3,16 +3,17 @@
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 
+
 namespace game
 {
-    class Camera
+    class Game_Camera
     {
     public:
-        Camera();
-        Camera(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up);
-        ~Camera();
+        Game_Camera();
+        Game_Camera(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up);
+        ~Game_Camera();
 
-        // Update camera
+        // Update Game_Camera
         void Set(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up);
 
         void MoveForward(float distance);

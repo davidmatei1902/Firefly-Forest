@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "components/simple_scene.h"
-#include "Camera.h" 
+#include "Game_Camera.h" 
 #include "Tree.h"
 #include "WatchTower.h"
 #include "Firefly.h"
@@ -25,7 +25,7 @@ namespace m1
         void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color, Texture2D *texture = nullptr);
 
     protected:
-        game::Camera* camera;
+        game::Game_Camera* camera;
         glm::mat4 projectionMatrix;
         std::unordered_map<std::string, Texture2D*> textures;
 

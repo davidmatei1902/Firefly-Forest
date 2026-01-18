@@ -31,7 +31,7 @@ FireflyForestController::~FireflyForestController()
 void FireflyForestController::Init()
 {
     // initialize camera
-    camera = new game::Camera();
+    camera = new game::Game_Camera();
     camera->Set(glm::vec3(0, 8, 25), glm::vec3(0, 4, 0), glm::vec3(0, 1, 0));
 
     // load meshes
