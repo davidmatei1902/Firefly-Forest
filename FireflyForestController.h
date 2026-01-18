@@ -22,11 +22,12 @@ namespace m1
         void OnKeyPress(int key, int mods) override;
         void OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY) override;
 
-        void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color);
+        void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color, Texture2D *texture = nullptr);
 
     protected:
         game::Camera* camera;
         glm::mat4 projectionMatrix;
+        std::unordered_map<std::string, Texture2D*> textures;
 
         // Entitatile scenei
         std::vector<Tree*> trees;
@@ -37,5 +38,7 @@ namespace m1
         float fogMaxDistance = 50.0f;
         glm::vec3 fogColor = glm::vec3(0.15f, 0.15f, 0.2f);
         bool renderFog = true;
+
+        GLuint manualTextureID = 0;
     };
 }

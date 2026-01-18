@@ -12,12 +12,18 @@ Tree::~Tree() {}
 
 void Tree::Render(const std::unordered_map<std::string, Mesh*>& meshes,
     Shader* shader,
-    const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+    const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
+    const std::unordered_map<std::string, Texture2D*>& textures) {
 
     if (!shader || !shader->GetProgramID()) return;
 
     // trunk (cylinder)
     {
+        Texture2D* barkTexture = nullptr;
+        if (textures.find("bark") != textures.end()) {
+            barkTexture = textures.at("bark");
+        }
+
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, position + glm::vec3(0, 1.0f, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.8f, 4.0f, 0.8f));
@@ -25,12 +31,17 @@ void Tree::Render(const std::unordered_map<std::string, Mesh*>& meshes,
         glm::vec3 trunkColor = glm::vec3(0.4f, 0.25f, 0.1f); // brown
 
         // type = 1 (trunk -> tapering), bendStrength = 0.0 (static)
-        RenderSimpleMesh(meshes.at("cylinder"), shader, modelMatrix, trunkColor, 1, 0.0f, viewMatrix, projectionMatrix);
+        RenderSimpleMesh(meshes.at("cylinder"), shader, modelMatrix, trunkColor, 1, 0.0f, viewMatrix, projectionMatrix, barkTexture);
     }
 
     // foliage (layers of boxes)
     float currentY = startHeight;
     float currentSpan = baseSpan;
+
+    Texture2D* leafTexture = nullptr;
+    if (textures.find("pinetree") != textures.end()) {
+        leafTexture = textures.at("pinetree");
+    }
 
     for (int i = 0; i < numLayers; i++) {
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -51,8 +62,7 @@ void Tree::Render(const std::unordered_map<std::string, Mesh*>& meshes,
             amplitude = 0.08f;      // top: visible movement
 
         // type = 2 (foliage -> sinusoidal wind)
-        RenderSimpleMesh(meshes.at("box"), shader, modelMatrix, leafColor, 2, amplitude, viewMatrix, projectionMatrix);
-
+        RenderSimpleMesh(meshes.at("box"), shader, modelMatrix, leafColor, 2, amplitude, viewMatrix, projectionMatrix, leafTexture);
         // update position and size for next layer
         currentY += (layerThickness + spacing);
         currentSpan -= 0.3f;
@@ -61,7 +71,7 @@ void Tree::Render(const std::unordered_map<std::string, Mesh*>& meshes,
 
 void Tree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix,
     const glm::vec3& color, int objectType, float bendStrength,
-    const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+    const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Texture2D *texture) {
 
     if (!mesh) return;
 
@@ -81,6 +91,19 @@ void Tree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMa
 
     // send tree height for Y normalization
     glUniform1f(glGetUniformLocation(shader->program, "u_tree_height"), 4.0f);
+
+	// bind texture if available
+    if (texture)
+    {
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+        glUniform1i(glGetUniformLocation(shader->program, "texture_1"), 5);
+        glUniform1i(glGetUniformLocation(shader->program, "u_use_texture"), 1);
+    }
+    else
+    {
+        glUniform1i(glGetUniformLocation(shader->program, "u_use_texture"), 0);
+    }
 
     mesh->Render();
 }

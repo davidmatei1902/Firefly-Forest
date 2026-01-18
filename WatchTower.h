@@ -8,11 +8,11 @@ namespace m1 {
         ~WatchTower();
 
         void Render(const std::unordered_map<std::string, Mesh*>& meshes, Shader* shader,
-            const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+            const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Texture2D *texture);
 
     private:
         glm::vec3 position;
         void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix,
-            const glm::vec3& color, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+            const glm::vec3& color, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Texture2D *texture);
     };
 }

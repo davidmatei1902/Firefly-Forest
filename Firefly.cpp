@@ -52,16 +52,22 @@ void Firefly::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& mode
 
     shader->Use();
 
-    // send matrices
+    // matrices
     glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
     glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-    // send color
-    glUniform3fv(glGetUniformLocation(shader->program, "object_color"), 1, glm::value_ptr(color));
-
-    // set object type to 0 (static/no wind)
+    // disable wind
     glUniform1i(glGetUniformLocation(shader->program, "u_object_type"), 0);
+
+    // enable fog
+    glUniform1i(glGetUniformLocation(shader->program, "u_render_fog"), 1);
+    glUniform1f(glGetUniformLocation(shader->program, "fog_max_dist"), 0.01f);
+    glUniform3fv(glGetUniformLocation(shader->program, "fog_color"), 1, glm::value_ptr(color));
+
+    // unbind texture for safety
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     mesh->Render();
 }

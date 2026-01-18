@@ -44,6 +44,66 @@ void FireflyForestController::Init()
         mesh = new Mesh("sphere"); mesh->LoadMesh(path, "sphere.obj"); meshes[mesh->GetMeshID()] = mesh;
     }
 
+    // load textures
+    {
+		{   // load ground texture
+            Texture2D* texture = new Texture2D();
+            string fullPath = PATH_JOIN(window->props.selfDir, RESOURCE_PATH::TEXTURES, "ground2.jpg");
+            texture->Load2D(fullPath.c_str(), GL_REPEAT);
+
+            manualTextureID = texture->GetTextureID();
+
+            glBindTexture(GL_TEXTURE_2D, manualTextureID);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            textures["ground"] = texture;
+        }
+        
+        {
+            // load pinetree texture
+            Texture2D* texture = new Texture2D();
+            string fullPath = PATH_JOIN(window->props.selfDir, RESOURCE_PATH::TEXTURES, "pinetree.jpg");
+            texture->Load2D(fullPath.c_str(), GL_REPEAT);
+
+            glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            textures["pinetree"] = texture;
+        }
+
+        {
+            // load bark texture
+            Texture2D* texture = new Texture2D();
+            string fullPath = PATH_JOIN(window->props.selfDir, RESOURCE_PATH::TEXTURES, "bark.jpg");
+            texture->Load2D(fullPath.c_str(), GL_REPEAT);
+
+            glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            textures["bark"] = texture;
+        }
+
+        {
+			// load watchtower texture
+            Texture2D* texture = new Texture2D();
+            string fullPath = PATH_JOIN(window->props.selfDir, RESOURCE_PATH::TEXTURES, "plank.jpg");
+            texture->Load2D(fullPath.c_str(), GL_REPEAT);
+
+            glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            textures["plank"] = texture;
+        }
+    }
+
     // load shader
     {
         Shader* shader = new Shader("ForestShader");
@@ -109,18 +169,17 @@ void FireflyForestController::Update(float deltaTimeSeconds)
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0.01f, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0f));
-        // color: dark forest green
-        RenderSimpleMesh(meshes["plane"], shader, modelMatrix, glm::vec3(0.05f, 0.15f, 0.05f));
+        RenderSimpleMesh(meshes["plane"], shader, modelMatrix, glm::vec3(0.5f), textures["ground"]);
     }
 
     // tower
     if (watchTower) {
-        watchTower->Render(meshes, shader, camera->GetViewMatrix(), projectionMatrix);
+        watchTower->Render(meshes, shader, camera->GetViewMatrix(), projectionMatrix, textures["plank"]);
     }
 
     // trees
     for (auto tree : trees) {
-        tree->Render(meshes, shader, camera->GetViewMatrix(), projectionMatrix);
+        tree->Render(meshes, shader, camera->GetViewMatrix(), projectionMatrix, textures);
     }
 
     // fireflies
@@ -132,16 +191,42 @@ void FireflyForestController::Update(float deltaTimeSeconds)
 
 void FireflyForestController::FrameEnd() {}
 
-void FireflyForestController::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color)
+void FireflyForestController::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color, Texture2D* texture)
 {
     if (!mesh || !shader || !shader->GetProgramID()) return;
 
+    shader->Use();
+
+    // matrix uniforms
     glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
     glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
     glUniform3fv(glGetUniformLocation(shader->program, "object_color"), 1, glm::value_ptr(color));
 
+    GLint loc_texture = glGetUniformLocation(shader->program, "texture_1");
+    GLint loc_use = glGetUniformLocation(shader->program, "u_use_texture");
+
+    if (texture && manualTextureID > 0)
+    {
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, manualTextureID);
+        glUniform1i(loc_texture, 5);
+        glUniform1i(loc_use, 1);
+    }
+    else if (texture)
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+        glUniform1i(loc_texture, 0);
+        glUniform1i(loc_use, 1);
+    }
+    else 
+    {
+        glUniform1i(loc_use, 0);
+    }
+
+    // dummy uniforms for trees
+    glUniform1f(glGetUniformLocation(shader->program, "u_tree_height"), 1.0f);
     glUniform1i(glGetUniformLocation(shader->program, "u_object_type"), 0);
     glUniform1f(glGetUniformLocation(shader->program, "u_bend_strength"), 0.0f);
 

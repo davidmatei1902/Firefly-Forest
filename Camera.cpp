@@ -1,4 +1,4 @@
-#include "../build/Camera.h"
+#include "Camera.h"
 
 namespace game
 {

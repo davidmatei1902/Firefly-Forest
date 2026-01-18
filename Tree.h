@@ -9,7 +9,8 @@ namespace m1 {
 
         void Render(const std::unordered_map<std::string, Mesh*>& meshes,
             Shader* shader,
-            const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+            const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
+            const std::unordered_map<std::string, Texture2D*>& textures);
 
     private:
         glm::vec3 position;
@@ -23,6 +24,6 @@ namespace m1 {
 
         void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix,
             const glm::vec3& color, int objectType, float bendStrength,
-            const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+            const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Texture2D* texture);
     };
 }
