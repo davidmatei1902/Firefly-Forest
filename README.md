@@ -1,7 +1,5 @@
 # Firefly Forest
 
-## Project Overview
-
 This project implements a 3D virtual environment depicting a night-time forest scene. The application demonstrates fundamental computer graphics concepts by combining procedural generation, complex geometric modeling, and atmospheric effects to create an immersive visual experience.
 
 The scene features a generated forest of animated pine trees, a central watchtower structure, and a dynamic particle system representing fireflies, all rendered with depth-enhancing volumetric fog.
